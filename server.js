@@ -67,6 +67,75 @@ function stripNoiseFields(node) {
   return out;
 }
 
+/** Known cluster-managed metadata / annotations safe to strip for “export manifest” workflows */
+const K8S_METADATA_KEYS = new Set([
+  "creationTimestamp",
+  "deletionGracePeriodSeconds",
+  "deletionTimestamp",
+  "generation",
+  "managedFields",
+  "resourceVersion",
+  "selfLink",
+  "uid",
+  "clusterName",
+]);
+
+const K8S_ANNOTATION_KEYS_STRIP = new Set([
+  "kubectl.kubernetes.io/last-applied-configuration",
+  "deployment.kubernetes.io/revision",
+]);
+
+function looksLikeKubernetesDoc(obj) {
+  return (
+    obj !== null &&
+    typeof obj === "object" &&
+    !Array.isArray(obj) &&
+    typeof obj.apiVersion === "string" &&
+    typeof obj.kind === "string"
+  );
+}
+
+/**
+ * Removes status and read-only metadata so Clean output is suitable for re-apply / GitOps
+ * (similar spirit to kubectl-neat). Only runs on objects with apiVersion + kind.
+ */
+function sanitizeKubernetesResource(obj) {
+  if (!looksLikeKubernetesDoc(obj)) {
+    return obj;
+  }
+
+  const out = { ...obj };
+  delete out.status;
+
+  if (out.kind === "List" && Array.isArray(out.items)) {
+    out.items = out.items.map((item) =>
+      looksLikeKubernetesDoc(item) ? sanitizeKubernetesResource(item) : item,
+    );
+    return out;
+  }
+
+  if (out.metadata && typeof out.metadata === "object" && !Array.isArray(out.metadata)) {
+    const md = { ...out.metadata };
+    for (const k of K8S_METADATA_KEYS) {
+      delete md[k];
+    }
+    if (md.annotations && typeof md.annotations === "object" && !Array.isArray(md.annotations)) {
+      const ann = { ...md.annotations };
+      for (const k of K8S_ANNOTATION_KEYS_STRIP) {
+        delete ann[k];
+      }
+      if (Object.keys(ann).length === 0) {
+        delete md.annotations;
+      } else {
+        md.annotations = ann;
+      }
+    }
+    out.metadata = md;
+  }
+
+  return out;
+}
+
 function cleanParsedDocument(doc) {
   if (doc === undefined) {
     return undefined;
@@ -75,7 +144,12 @@ function cleanParsedDocument(doc) {
     return null;
   }
   if (typeof doc === "object") {
-    return stripNoiseFields(doc);
+    let next = stripNoiseFields(doc);
+    if (looksLikeKubernetesDoc(next)) {
+      next = sanitizeKubernetesResource(next);
+      next = stripNoiseFields(next);
+    }
+    return next;
   }
   return doc;
 }
@@ -103,11 +177,26 @@ app.use(express.static(path.join(__dirname, "public")));
 app.post("/validate", (req, res) => {
   const raw = typeof req.body === "string" ? req.body : "";
   try {
-    const parsed = yaml.load(raw);
-    res.json({
+    const docs = yaml.loadAll(raw, YAML_LOAD_OPTIONS);
+    if (docs.length === 0) {
+      return res.json({
+        valid: true,
+        message: "Valid YAML",
+        json: null,
+      });
+    }
+    if (docs.length === 1) {
+      const parsed = docs[0];
+      return res.json({
+        valid: true,
+        message: "Valid YAML",
+        json: parsed === undefined ? null : parsed,
+      });
+    }
+    return res.json({
       valid: true,
       message: "Valid YAML",
-      json: parsed === undefined ? null : parsed,
+      json: docs.map((d) => (d === undefined ? null : d)),
     });
   } catch (err) {
     res.json(buildValidationError(err));
