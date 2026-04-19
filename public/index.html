@@ -5,19 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Validate YAML syntax and clean Kubernetes-style manifests online. Free, no install."
+      content="Validate and clean YAML instantly online. Kubernetes-ready YAML validator tool."
     />
     <meta name="robots" content="index, follow" />
     <meta name="color-scheme" content="dark light" />
-    <meta name="theme-color" content="#1e1e1e" />
-    <meta property="og:title" content="YAML Validator — syntax check &amp; clean" />
+    <meta name="theme-color" content="#0d1117" />
+    <meta property="og:title" content="Free YAML Validator Online" />
     <meta
       property="og:description"
-      content="Validate YAML syntax and clean Kubernetes-style manifests online."
+      content="Validate and clean YAML instantly online. Kubernetes-ready YAML validator tool."
     />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
-    <title>YAML Validator — syntax check &amp; clean</title>
+    <title>Free YAML Validator Online</title>
+
+    <!-- Google Analytics GA4 — replace GA_MEASUREMENT_ID with your Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GEFQWG7XSD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-GEFQWG7XSD");
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -27,7 +45,7 @@
           <span class="top-bar__logo" aria-hidden="true">{ }</span>
           <div class="top-bar__titles">
             <p class="top-bar__title">YAML Validator</p>
-            <p class="top-bar__tagline">Syntax check &amp; clean YAML</p>
+            <p class="top-bar__tagline">DevTools-style editor</p>
           </div>
         </div>
         <button
@@ -35,68 +53,138 @@
           class="btn-icon theme-toggle"
           id="theme-toggle"
           aria-label="Toggle light or dark theme"
-          title="Light / dark theme"
+          title="Theme"
         >
           <span class="theme-toggle__glyph" aria-hidden="true"></span>
         </button>
       </header>
 
       <main class="main">
-        <section class="intro" aria-labelledby="page-title">
-          <h1 id="page-title">YAML Validator</h1>
-          <p class="intro__lead">
-            Check YAML syntax and normalize manifests in the browser—built for
-            configs, CI, and Kubernetes workflows. No install; runs entirely in
-            your session.
+        <!-- HERO: SEO + conversion -->
+        <section class="hero" aria-labelledby="page-title">
+          <h1 id="page-title" class="hero__title">Free YAML Validator Online</h1>
+          <p class="hero__subtitle">
+            Validate, Clean and Format YAML instantly (Kubernetes ready)
+          </p>
+          <p class="hero__description">
+            Paste your YAML, validate syntax, clean formatting and detect errors instantly. No
+            installation required. Works directly in your browser.
           </p>
         </section>
 
-        <section class="workspace" aria-label="YAML editor">
-          <section class="editor-panel" aria-labelledby="label-input">
-          <div class="editor-panel__chrome">
-            <div class="editor-panel__tab" id="label-input">
-              <span class="editor-panel__dot editor-panel__dot--in"></span>
-              <span>Input</span>
-            </div>
-            <button type="button" class="btn btn-ghost btn-compact" id="btn-clear-input">
-              Clear input
-            </button>
-          </div>
-          <div class="editor-panel__body">
-            <textarea
-              id="yaml-input"
-              class="editor-textarea"
-              spellcheck="false"
-              placeholder="# Paste YAML&#10;foo: bar&#10;nested:&#10;  list:&#10;    - 1&#10;    - 2"
-            ></textarea>
-          </div>
-          </section>
+        <!-- Main tool -->
+        <section class="tool-card" aria-label="YAML tools">
+          <div class="workspace">
+            <section class="editor-panel editor-panel--input" aria-labelledby="label-input">
+              <div class="editor-panel__chrome">
+                <div class="editor-panel__tab" id="label-input">
+                  <span class="editor-panel__dot editor-panel__dot--in"></span>
+                  <span>Input</span>
+                </div>
+                <div class="editor-panel__actions">
+                  <button type="button" class="btn btn-ghost btn-compact" id="btn-clear-input">
+                    Clear input
+                  </button>
+                </div>
+              </div>
+              <div class="editor-panel__body editor-panel__body--input">
+                <textarea
+                  id="yaml-input"
+                  class="editor-textarea"
+                  spellcheck="false"
+                  placeholder="# Paste YAML&#10;apiVersion: apps/v1&#10;kind: Deployment&#10;..."
+                  rows="18"
+                ></textarea>
+              </div>
+            </section>
 
-          <div class="action-rail" role="group" aria-label="YAML actions">
-          <button type="button" class="btn btn-primary" id="btn-validate">Validate</button>
-          <button type="button" class="btn btn-secondary" id="btn-clean">Clean</button>
-          </div>
-
-          <section class="editor-panel" aria-labelledby="label-output">
-          <div class="editor-panel__chrome">
-            <div class="editor-panel__tab" id="label-output">
-              <span class="editor-panel__dot editor-panel__dot--out"></span>
-              <span>Output</span>
+            <div class="action-column" role="group" aria-label="Actions">
+              <div class="tabs" role="tablist" aria-label="Choose action">
+                <button
+                  type="button"
+                  class="tabs__btn is-active"
+                  id="tab-validate"
+                  role="tab"
+                  aria-selected="true"
+                  data-action="validate"
+                >
+                  Validate
+                </button>
+                <button
+                  type="button"
+                  class="tabs__btn"
+                  id="tab-clean"
+                  role="tab"
+                  aria-selected="false"
+                  data-action="clean"
+                >
+                  Clean
+                </button>
+                <button
+                  type="button"
+                  class="tabs__btn"
+                  id="tab-format"
+                  role="tab"
+                  aria-selected="false"
+                  data-action="format"
+                >
+                  Format
+                </button>
+              </div>
+              <button type="button" class="btn btn-primary btn-run" id="btn-run">
+                Run <span class="btn-run__hint" id="run-hint">Validate</span>
+              </button>
             </div>
-            <button type="button" class="btn btn-ghost btn-compact" id="btn-copy-output">
-              Copy output
-            </button>
+
+            <section class="editor-panel editor-panel--output" aria-labelledby="label-output">
+              <div class="editor-panel__chrome">
+                <div class="editor-panel__tab" id="label-output">
+                  <span class="editor-panel__dot editor-panel__dot--out"></span>
+                  <span>Output</span>
+                </div>
+                <div class="editor-panel__actions">
+                  <button type="button" class="btn btn-ghost btn-compact" id="btn-copy-output">
+                    Copy output
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-compact" id="btn-download-yaml">
+                    Download YAML
+                  </button>
+                </div>
+              </div>
+              <div class="output-stack">
+                <p class="detection-banner" id="detection-banner" aria-live="polite">
+                  <span class="detection-banner__label">Detected:</span>
+                  <span id="detection-text">—</span>
+                </p>
+                <div class="editor-panel__body">
+                  <textarea
+                    id="yaml-output"
+                    class="editor-textarea"
+                    readonly
+                    spellcheck="false"
+                    placeholder="Results appear here after you run an action."
+                    rows="18"
+                  ></textarea>
+                </div>
+              </div>
+            </section>
           </div>
-          <div class="editor-panel__body">
-            <textarea
-              id="yaml-output"
-              class="editor-textarea"
-              readonly
-              spellcheck="false"
-              placeholder="Validation message or cleaned YAML appears here."
-            ></textarea>
-          </div>
-          </section>
+        </section>
+
+        <!-- SEO content -->
+        <section class="seo-block" aria-labelledby="seo-what">
+          <h2 id="seo-what" class="seo-block__h2">What is a YAML Validator?</h2>
+          <p class="seo-block__p">
+            A YAML validator is a tool that checks if your YAML syntax is correct. It helps
+            developers avoid configuration errors in Kubernetes, CI/CD pipelines and DevOps tools.
+          </p>
+          <h2 id="seo-why" class="seo-block__h2">Why use this tool?</h2>
+          <ul class="seo-block__list">
+            <li>Instant validation</li>
+            <li>Clean formatting</li>
+            <li>No installation required</li>
+            <li>Works directly in your browser</li>
+          </ul>
         </section>
       </main>
 
@@ -106,16 +194,27 @@
     </div>
 
     <script>
+      /**
+       * YAML Validator — client logic (no frameworks).
+       * Tabs pick the action; Run executes. Clean/Format expect JSON from API.
+       */
+
       const input = document.getElementById("yaml-input");
       const output = document.getElementById("yaml-output");
       const statusText = document.getElementById("status-text");
-      const btnValidate = document.getElementById("btn-validate");
-      const btnClean = document.getElementById("btn-clean");
+      const detectionText = document.getElementById("detection-text");
+      const btnRun = document.getElementById("btn-run");
+      const runHint = document.getElementById("run-hint");
       const btnClearInput = document.getElementById("btn-clear-input");
       const btnCopyOutput = document.getElementById("btn-copy-output");
+      const btnDownloadYaml = document.getElementById("btn-download-yaml");
       const themeToggle = document.getElementById("theme-toggle");
+      const tabButtons = document.querySelectorAll(".tabs__btn");
 
       const THEME_KEY = "yaml-validator-theme";
+
+      /** @type {'validate' | 'clean' | 'format'} */
+      let currentAction = "validate";
 
       function getPreferredTheme() {
         const saved = localStorage.getItem(THEME_KEY);
@@ -141,6 +240,41 @@
         statusText.textContent = msg;
       }
 
+      function setDetection(d) {
+        if (!d || !d.summary) {
+          detectionText.textContent = "Unknown resource";
+          return;
+        }
+        detectionText.textContent = d.summary;
+      }
+
+      function clearInputErrorHighlight() {
+        input.classList.remove("editor-textarea--error-focus");
+      }
+
+      /**
+       * Selects the error line and scrolls the textarea so the user sees it.
+       * Native textarea cannot paint per-line backgrounds; selection + ::selection styling is used.
+       */
+      function focusErrorLine(lineNumber) {
+        clearInputErrorHighlight();
+        if (typeof lineNumber !== "number" || lineNumber < 1) return;
+        const text = input.value;
+        const lines = text.split(/\r?\n/);
+        if (lineNumber > lines.length) return;
+        let start = 0;
+        for (let i = 0; i < lineNumber - 1; i++) {
+          start += lines[i].length + 1;
+        }
+        const lineLen = lines[lineNumber - 1].length;
+        const end = start + lineLen;
+        input.focus();
+        input.setSelectionRange(start, end);
+        input.classList.add("editor-textarea--error-focus");
+        const lh = parseFloat(getComputedStyle(input).lineHeight) || 20;
+        input.scrollTop = Math.max(0, (lineNumber - 2) * lh);
+      }
+
       async function postText(url, body) {
         return fetch(url, {
           method: "POST",
@@ -149,8 +283,26 @@
         });
       }
 
+      function setActiveTab(action) {
+        currentAction = action;
+        tabButtons.forEach((btn) => {
+          const on = btn.dataset.action === action;
+          btn.classList.toggle("is-active", on);
+          btn.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        const labels = { validate: "Validate", clean: "Clean", format: "Format" };
+        runHint.textContent = labels[action];
+      }
+
+      tabButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          setActiveTab(/** @type {'validate'|'clean'|'format'} */ (btn.dataset.action));
+        });
+      });
+
       btnClearInput.addEventListener("click", () => {
         input.value = "";
+        clearInputErrorHighlight();
         input.focus();
         setStatus("Input cleared");
       });
@@ -170,26 +322,47 @@
             btnCopyOutput.textContent = original;
           }, 1600);
         } catch (e) {
-          setStatus("Copy failed — select text manually");
+          setStatus("Copy failed");
         }
       });
 
-      btnValidate.addEventListener("click", async () => {
+      /** Download current output as clean.yaml (Blob API). */
+      btnDownloadYaml.addEventListener("click", () => {
+        const text = output.value;
+        if (!text.trim()) {
+          setStatus("Nothing to download");
+          return;
+        }
+        const blob = new Blob([text], { type: "text/yaml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "clean.yaml";
+        a.rel = "noopener";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        setStatus("Downloaded clean.yaml");
+      });
+
+      async function runValidate() {
         const yamlText = input.value;
+        clearInputErrorHighlight();
         setStatus("Validating…");
         try {
           const res = await postText("/validate", yamlText);
           const data = await res.json();
           if (data.valid) {
+            setDetection(data.detection);
             let text =
               "# Validation successful — YAML syntax is OK.\n" +
               (typeof data.documentCount === "number"
                 ? `# documents_in_stream: ${data.documentCount}\n`
                 : "") +
-              "# (ValidKube-style: empty list = nothing failed this check.)\n" +
               "resources: []\n\n" +
               "---\n\n" +
-              "This check only confirms the parser could read your YAML. It does not validate Kubernetes API schemas, CRDs, or policies.\n";
+              "Syntax-only check; not Kubernetes API schema validation.\n";
             if (data.json !== undefined && data.json !== null) {
               text += "\nParsed structure (JSON preview):\n\n";
               try {
@@ -203,28 +376,68 @@
             output.value = text;
             setStatus("Validation successful");
           } else {
-            output.value = data.error || data.message || "Invalid YAML";
+            const msg = data.error || data.message || "Invalid YAML";
+            output.value = msg;
             setStatus("Validation failed");
+            focusErrorLine(data.line);
           }
         } catch (e) {
           output.value = "Network error: " + (e.message || String(e));
           setStatus("Request failed");
         }
-      });
+      }
 
-      btnClean.addEventListener("click", async () => {
-        const yaml = input.value;
+      async function runClean() {
+        const yamlText = input.value;
+        clearInputErrorHighlight();
         setStatus("Cleaning…");
         try {
-          const res = await postText("/clean", yaml);
-          const text = await res.text();
-          output.value = text;
-          setStatus(res.ok ? "Clean YAML ready" : "Clean failed (see output)");
+          const res = await postText("/clean", yamlText);
+          const data = await res.json();
+          if (!res.ok) {
+            output.value = data.error || data.message || "Clean failed";
+            setStatus("Clean failed");
+            focusErrorLine(data.line);
+            return;
+          }
+          output.value = data.yaml || "";
+          setDetection(data.detection);
+          setStatus("Clean complete");
         } catch (e) {
           output.value = "Network error: " + (e.message || String(e));
           setStatus("Request failed");
         }
+      }
+
+      async function runFormat() {
+        const yamlText = input.value;
+        clearInputErrorHighlight();
+        setStatus("Formatting…");
+        try {
+          const res = await postText("/format", yamlText);
+          const data = await res.json();
+          if (!res.ok) {
+            output.value = data.error || data.message || "Format failed";
+            setStatus("Format failed");
+            focusErrorLine(data.line);
+            return;
+          }
+          output.value = data.yaml || "";
+          setDetection(data.detection);
+          setStatus("Format complete");
+        } catch (e) {
+          output.value = "Network error: " + (e.message || String(e));
+          setStatus("Request failed");
+        }
+      }
+
+      btnRun.addEventListener("click", () => {
+        if (currentAction === "validate") runValidate();
+        else if (currentAction === "clean") runClean();
+        else runFormat();
       });
+
+      setActiveTab("validate");
     </script>
   </body>
 </html>

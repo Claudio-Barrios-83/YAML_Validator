@@ -173,6 +173,46 @@ function cleanParsedDocument(doc) {
   return doc;
 }
 
+/**
+ * Best-effort Kubernetes summary from the first parsed document (for UI banner).
+ */
+function detectFromParsed(parsed) {
+  if (parsed === undefined || parsed === null) {
+    return {
+      summary: "Unknown resource",
+      kind: null,
+      namespace: null,
+    };
+  }
+  if (typeof parsed !== "object" || Array.isArray(parsed)) {
+    return {
+      summary: "Unknown resource",
+      kind: null,
+      namespace: null,
+    };
+  }
+  const kind = typeof parsed.kind === "string" ? parsed.kind : null;
+  if (!kind) {
+    return {
+      summary: "Unknown resource",
+      kind: null,
+      namespace: null,
+    };
+  }
+  const ns =
+    parsed.metadata &&
+    typeof parsed.metadata === "object" &&
+    !Array.isArray(parsed.metadata) &&
+    typeof parsed.metadata.namespace === "string"
+      ? parsed.metadata.namespace
+      : null;
+  const summary =
+    ns !== null
+      ? `${kind} (namespace: ${ns})`
+      : `${kind} (no namespace in manifest)`;
+  return { summary, kind, namespace: ns };
+}
+
 function buildValidationError(err) {
   const mark = err && err.mark;
   const line = mark != null && typeof mark.line === "number" ? mark.line + 1 : undefined;
@@ -203,6 +243,7 @@ app.post("/validate", (req, res) => {
         message: "YAML syntax is valid (empty stream)",
         documentCount: 0,
         json: null,
+        detection: detectFromParsed(undefined),
       });
     }
     if (docs.length === 1) {
@@ -212,6 +253,7 @@ app.post("/validate", (req, res) => {
         message: "YAML syntax is valid",
         documentCount: 1,
         json: parsed === undefined ? null : parsed,
+        detection: detectFromParsed(parsed),
       });
     }
     return res.json({
@@ -219,9 +261,33 @@ app.post("/validate", (req, res) => {
       message: `YAML syntax is valid (${docs.length} documents)`,
       documentCount: docs.length,
       json: docs.map((d) => (d === undefined ? null : d)),
+      detection: detectFromParsed(docs[0]),
     });
   } catch (err) {
     res.json(buildValidationError(err));
+  }
+});
+
+/**
+ * POST /format — cosmetic YAML layout only (indent 2, stable dump).
+ * Does not strip Kubernetes metadata or nulls (use /clean for that).
+ */
+app.post("/format", (req, res) => {
+  const raw = typeof req.body === "string" ? req.body : "";
+  try {
+    const documents = yaml.loadAll(raw, YAML_LOAD_OPTIONS);
+    const chunks = [];
+    for (const doc of documents) {
+      chunks.push(yaml.dump(doc, YAML_DUMP_OPTIONS).replace(/\s+$/, ""));
+    }
+    const yamlText =
+      chunks.length === 0 ? "" : chunks.join("\n---\n") + "\n";
+    res.json({
+      yaml: yamlText,
+      detection: detectFromParsed(documents[0]),
+    });
+  } catch (err) {
+    res.status(400).json(buildValidationError(err));
   }
 });
 
@@ -234,11 +300,14 @@ app.post("/clean", (req, res) => {
       const cleaned = cleanParsedDocument(doc);
       chunks.push(yaml.dump(cleaned, YAML_DUMP_OPTIONS).replace(/\s+$/, ""));
     }
-    const cleanText =
+    const yamlText =
       chunks.length === 0 ? "" : chunks.join("\n---\n") + "\n";
-    res.type("text/yaml; charset=utf-8").send(cleanText);
+    res.json({
+      yaml: yamlText,
+      detection: detectFromParsed(documents[0]),
+    });
   } catch (err) {
-    res.status(400).type("text/plain; charset=utf-8").send(err.message || String(err));
+    res.status(400).json(buildValidationError(err));
   }
 });
 
