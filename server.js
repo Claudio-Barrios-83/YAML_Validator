@@ -80,10 +80,45 @@ const K8S_METADATA_KEYS = new Set([
   "clusterName",
 ]);
 
+/** Keep deployment.kubernetes.io/revision — aligns with tools like ValidKube */
 const K8S_ANNOTATION_KEYS_STRIP = new Set([
   "kubectl.kubernetes.io/last-applied-configuration",
-  "deployment.kubernetes.io/revision",
 ]);
+
+/**
+ * Drops keys whose value is an empty plain object {}, recursively (e.g. securityContext: {}).
+ * Applied only under resource spec; omitting {} matches usual Kubernetes defaults.
+ */
+function pruneEmptyMappingObjects(node) {
+  if (node === null || node === undefined) {
+    return node;
+  }
+  if (Array.isArray(node)) {
+    return node.map((item) => pruneEmptyMappingObjects(item));
+  }
+  if (typeof node !== "object") {
+    return node;
+  }
+  if (node instanceof Date || Buffer.isBuffer(node)) {
+    return node;
+  }
+  const out = {};
+  for (const [k, v] of Object.entries(node)) {
+    let child = pruneEmptyMappingObjects(v);
+    if (
+      child &&
+      typeof child === "object" &&
+      !Array.isArray(child) &&
+      !(child instanceof Date) &&
+      !Buffer.isBuffer(child) &&
+      Object.keys(child).length === 0
+    ) {
+      continue;
+    }
+    out[k] = child;
+  }
+  return out;
+}
 
 function looksLikeKubernetesDoc(obj) {
   return (
@@ -131,6 +166,10 @@ function sanitizeKubernetesResource(obj) {
       }
     }
     out.metadata = md;
+  }
+
+  if (out.spec !== undefined && typeof out.spec === "object" && out.spec !== null) {
+    out.spec = pruneEmptyMappingObjects(out.spec);
   }
 
   return out;
