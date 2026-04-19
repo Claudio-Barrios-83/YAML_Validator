@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Validate and clean YAML instantly online"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#1e1e1e" />
+    <meta property="og:title" content="Free YAML Validator Online" />
+    <meta
+      property="og:description"
+      content="Validate and clean YAML instantly online"
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <title>Free YAML Validator Online</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-bar">
+        <div class="top-bar__brand">
+          <span class="top-bar__logo" aria-hidden="true">{ }</span>
+          <div class="top-bar__titles">
+            <p class="top-bar__title">YAML Validator</p>
+            <p class="top-bar__tagline">Fast, lightweight editor</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn-icon theme-toggle"
+          id="theme-toggle"
+          aria-label="Toggle light or dark theme"
+          title="Light / dark theme"
+        >
+          <span class="theme-toggle__glyph" aria-hidden="true"></span>
+        </button>
+      </header>
+
+      <main class="main">
+        <section class="intro" aria-labelledby="page-title">
+          <h1 id="page-title">Free YAML Validator Online</h1>
+          <p class="intro__lead">
+            Paste YAML to check syntax, inspect structure, normalize formatting,
+            and optionally review Kubernetes-oriented feedback—no install
+            required.
+          </p>
+          <h2 id="what-is-yaml-validator">What is a YAML validator?</h2>
+          <p>
+            A YAML validator reads your text and reports whether it follows YAML
+            rules (indentation, mappings, lists, and multi-document streams). It
+            helps you catch typos and structural mistakes before they break CI,
+            configs, or cluster manifests.
+          </p>
+          <h2 id="why-use-this-tool">Why use this tool?</h2>
+          <p>
+            You get instant feedback in the browser, a cleaned-up dump for
+            readable files, and optional AI hints—useful for DevOps, app
+            configs, GitHub Actions, Helm-style YAML, and API specs. The page
+            stays small and fast: one CSS file, no frameworks, no tracking
+            scripts.
+          </p>
+        </section>
+
+        <section class="workspace" aria-label="YAML editor">
+          <section class="editor-panel" aria-labelledby="label-input">
+          <div class="editor-panel__chrome">
+            <div class="editor-panel__tab" id="label-input">
+              <span class="editor-panel__dot editor-panel__dot--in"></span>
+              <span>Input</span>
+            </div>
+            <button type="button" class="btn btn-ghost btn-compact" id="btn-clear-input">
+              Clear input
+            </button>
+          </div>
+          <div class="editor-panel__body">
+            <textarea
+              id="yaml-input"
+              class="editor-textarea"
+              spellcheck="false"
+              placeholder="# Paste YAML&#10;foo: bar&#10;nested:&#10;  list:&#10;    - 1&#10;    - 2"
+            ></textarea>
+          </div>
+          </section>
+
+          <div class="action-rail" role="group" aria-label="YAML actions">
+          <button type="button" class="btn btn-primary" id="btn-validate">Validate</button>
+          <button type="button" class="btn btn-secondary" id="btn-clean">Clean</button>
+          <button type="button" class="btn btn-ai" id="btn-analyze">Analyze with AI</button>
+          </div>
+
+          <section class="editor-panel" aria-labelledby="label-output">
+          <div class="editor-panel__chrome">
+            <div class="editor-panel__tab" id="label-output">
+              <span class="editor-panel__dot editor-panel__dot--out"></span>
+              <span>Output</span>
+            </div>
+            <button type="button" class="btn btn-ghost btn-compact" id="btn-copy-output">
+              Copy output
+            </button>
+          </div>
+          <div class="editor-panel__body">
+            <textarea
+              id="yaml-output"
+              class="editor-textarea"
+              readonly
+              spellcheck="false"
+              placeholder="Validation message or cleaned YAML appears here."
+            ></textarea>
+          </div>
+          </section>
+        </section>
+      </main>
+
+      <footer class="status-bar" role="status" aria-live="polite">
+        <span id="status-text">Ready</span>
+      </footer>
+    </div>
+
+    <script>
+      const input = document.getElementById("yaml-input");
+      const output = document.getElementById("yaml-output");
+      const statusText = document.getElementById("status-text");
+      const btnValidate = document.getElementById("btn-validate");
+      const btnClean = document.getElementById("btn-clean");
+      const btnAnalyze = document.getElementById("btn-analyze");
+      const btnClearInput = document.getElementById("btn-clear-input");
+      const btnCopyOutput = document.getElementById("btn-copy-output");
+      const themeToggle = document.getElementById("theme-toggle");
+
+      const THEME_KEY = "yaml-validator-theme";
+
+      function getPreferredTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "light" || saved === "dark") return saved;
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches)
+          return "light";
+        return "dark";
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.dataset.theme = theme;
+        localStorage.setItem(THEME_KEY, theme);
+      }
+
+      applyTheme(getPreferredTheme());
+
+      themeToggle.addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+        applyTheme(next);
+      });
+
+      function setStatus(msg) {
+        statusText.textContent = msg;
+      }
+
+      async function postText(url, body) {
+        return fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+          body,
+        });
+      }
+
+      btnClearInput.addEventListener("click", () => {
+        input.value = "";
+        input.focus();
+        setStatus("Input cleared");
+      });
+
+      btnCopyOutput.addEventListener("click", async () => {
+        const text = output.value;
+        if (!text) {
+          setStatus("Nothing to copy");
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(text);
+          setStatus("Copied to clipboard");
+          const original = btnCopyOutput.textContent;
+          btnCopyOutput.textContent = "Copied!";
+          setTimeout(() => {
+            btnCopyOutput.textContent = original;
+          }, 1600);
+        } catch (e) {
+          setStatus("Copy failed — select text manually");
+        }
+      });
+
+      btnValidate.addEventListener("click", async () => {
+        const yamlText = input.value;
+        setStatus("Validating…");
+        try {
+          const res = await postText("/validate", yamlText);
+          const data = await res.json();
+          if (data.valid) {
+            const header = data.message || "Valid YAML";
+            let body = "";
+            if (data.json !== undefined) {
+              try {
+                body =
+                  "\n\n" +
+                  JSON.stringify(data.json, null, 2);
+              } catch (e) {
+                body = "\n\n" + String(data.json);
+              }
+            }
+            output.value = header + body;
+            setStatus("Valid YAML");
+          } else {
+            output.value = data.error || data.message || "Invalid YAML";
+            setStatus("Validation failed");
+          }
+        } catch (e) {
+          output.value = "Network error: " + (e.message || String(e));
+          setStatus("Request failed");
+        }
+      });
+
+      btnClean.addEventListener("click", async () => {
+        const yaml = input.value;
+        setStatus("Cleaning…");
+        try {
+          const res = await postText("/clean", yaml);
+          const text = await res.text();
+          output.value = text;
+          setStatus(res.ok ? "Clean YAML ready" : "Clean failed (see output)");
+        } catch (e) {
+          output.value = "Network error: " + (e.message || String(e));
+          setStatus("Request failed");
+        }
+      });
+
+      btnAnalyze.addEventListener("click", async () => {
+        const yamlText = input.value;
+        setStatus("Analyzing with AI…");
+        btnAnalyze.disabled = true;
+        try {
+          const res = await postText("/analyze", yamlText);
+          const data = await res.json();
+          if (data.enabled === false) {
+            output.value = data.message || "AI analysis is not configured.";
+            setStatus("AI analysis unavailable");
+            return;
+          }
+          if (!data.ok) {
+            output.value = data.error || "Analysis failed.";
+            setStatus("AI analysis failed");
+            return;
+          }
+          let text = data.analysis || "";
+          if (data.truncated) {
+            text =
+              "[Note: input was truncated on the server for token limits.]\n\n" + text;
+          }
+          output.value = text;
+          setStatus("AI analysis ready");
+        } catch (e) {
+          output.value = "Network error: " + (e.message || String(e));
+          setStatus("Request failed");
+        } finally {
+          btnAnalyze.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
