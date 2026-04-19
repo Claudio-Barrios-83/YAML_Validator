@@ -181,7 +181,7 @@ app.post("/validate", (req, res) => {
     if (docs.length === 0) {
       return res.json({
         valid: true,
-        message: "Valid YAML",
+        message: "YAML syntax is valid (empty stream)",
         json: null,
       });
     }
@@ -189,13 +189,13 @@ app.post("/validate", (req, res) => {
       const parsed = docs[0];
       return res.json({
         valid: true,
-        message: "Valid YAML",
+        message: "YAML syntax is valid",
         json: parsed === undefined ? null : parsed,
       });
     }
     return res.json({
       valid: true,
-      message: "Valid YAML",
+      message: `YAML syntax is valid (${docs.length} documents)`,
       json: docs.map((d) => (d === undefined ? null : d)),
     });
   } catch (err) {

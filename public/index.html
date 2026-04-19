@@ -198,19 +198,25 @@
           const res = await postText("/validate", yamlText);
           const data = await res.json();
           if (data.valid) {
-            const header = data.message || "Valid YAML";
-            let body = "";
-            if (data.json !== undefined) {
+            let text =
+              "All good — " +
+              (data.message || "YAML syntax is valid") +
+              ".\n\n" +
+              "That means the parser could read your YAML. It does not run Kubernetes API validation, CRD schemas, or cluster policies.\n";
+            if (data.json !== undefined && data.json !== null) {
+              text +=
+                "\n---\n\nParsed structure (JSON preview):\n\n";
               try {
-                body =
-                  "\n\n" +
-                  JSON.stringify(data.json, null, 2);
+                text += JSON.stringify(data.json, null, 2);
               } catch (e) {
-                body = "\n\n" + String(data.json);
+                text += String(data.json);
               }
+            } else {
+              text +=
+                "\n---\n\nNo JSON preview (empty or null document).";
             }
-            output.value = header + body;
-            setStatus("Valid YAML");
+            output.value = text;
+            setStatus("Syntax OK");
           } else {
             output.value = data.error || data.message || "Invalid YAML";
             setStatus("Validation failed");
