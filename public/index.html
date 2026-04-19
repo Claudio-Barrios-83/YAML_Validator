@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Validate and clean YAML instantly online"
+      content="Validate YAML syntax and clean Kubernetes-style manifests online. Free, no install."
     />
     <meta name="robots" content="index, follow" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#1e1e1e" />
-    <meta property="og:title" content="Free YAML Validator Online" />
+    <meta property="og:title" content="YAML Validator — syntax check &amp; clean" />
     <meta
       property="og:description"
-      content="Validate and clean YAML instantly online"
+      content="Validate YAML syntax and clean Kubernetes-style manifests online."
     />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
-    <title>Free YAML Validator Online</title>
+    <title>YAML Validator — syntax check &amp; clean</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -27,7 +27,7 @@
           <span class="top-bar__logo" aria-hidden="true">{ }</span>
           <div class="top-bar__titles">
             <p class="top-bar__title">YAML Validator</p>
-            <p class="top-bar__tagline">Fast, lightweight editor</p>
+            <p class="top-bar__tagline">Syntax check &amp; clean YAML</p>
           </div>
         </div>
         <button
@@ -43,26 +43,11 @@
 
       <main class="main">
         <section class="intro" aria-labelledby="page-title">
-          <h1 id="page-title">Free YAML Validator Online</h1>
+          <h1 id="page-title">YAML Validator</h1>
           <p class="intro__lead">
-            Paste YAML to check syntax, inspect structure, normalize formatting,
-            and optionally review Kubernetes-oriented feedback—no install
-            required.
-          </p>
-          <h2 id="what-is-yaml-validator">What is a YAML validator?</h2>
-          <p>
-            A YAML validator reads your text and reports whether it follows YAML
-            rules (indentation, mappings, lists, and multi-document streams). It
-            helps you catch typos and structural mistakes before they break CI,
-            configs, or cluster manifests.
-          </p>
-          <h2 id="why-use-this-tool">Why use this tool?</h2>
-          <p>
-            You get instant feedback in the browser, a cleaned-up dump for
-            readable files, and optional AI hints—useful for DevOps, app
-            configs, GitHub Actions, Helm-style YAML, and API specs. The page
-            stays small and fast: one CSS file, no frameworks, no tracking
-            scripts.
+            Check YAML syntax and normalize manifests in the browser—built for
+            configs, CI, and Kubernetes workflows. No install; runs entirely in
+            your session.
           </p>
         </section>
 
@@ -90,7 +75,6 @@
           <div class="action-rail" role="group" aria-label="YAML actions">
           <button type="button" class="btn btn-primary" id="btn-validate">Validate</button>
           <button type="button" class="btn btn-secondary" id="btn-clean">Clean</button>
-          <button type="button" class="btn btn-ai" id="btn-analyze">Analyze with AI</button>
           </div>
 
           <section class="editor-panel" aria-labelledby="label-output">
@@ -127,7 +111,6 @@
       const statusText = document.getElementById("status-text");
       const btnValidate = document.getElementById("btn-validate");
       const btnClean = document.getElementById("btn-clean");
-      const btnAnalyze = document.getElementById("btn-analyze");
       const btnClearInput = document.getElementById("btn-clear-input");
       const btnCopyOutput = document.getElementById("btn-copy-output");
       const themeToggle = document.getElementById("theme-toggle");
@@ -199,24 +182,26 @@
           const data = await res.json();
           if (data.valid) {
             let text =
-              "All good — " +
-              (data.message || "YAML syntax is valid") +
-              ".\n\n" +
-              "That means the parser could read your YAML. It does not run Kubernetes API validation, CRD schemas, or cluster policies.\n";
+              "# Validation successful — YAML syntax is OK.\n" +
+              (typeof data.documentCount === "number"
+                ? `# documents_in_stream: ${data.documentCount}\n`
+                : "") +
+              "# (ValidKube-style: empty list = nothing failed this check.)\n" +
+              "resources: []\n\n" +
+              "---\n\n" +
+              "This check only confirms the parser could read your YAML. It does not validate Kubernetes API schemas, CRDs, or policies.\n";
             if (data.json !== undefined && data.json !== null) {
-              text +=
-                "\n---\n\nParsed structure (JSON preview):\n\n";
+              text += "\nParsed structure (JSON preview):\n\n";
               try {
                 text += JSON.stringify(data.json, null, 2);
               } catch (e) {
                 text += String(data.json);
               }
             } else {
-              text +=
-                "\n---\n\nNo JSON preview (empty or null document).";
+              text += "\nNo JSON preview (empty or null document).";
             }
             output.value = text;
-            setStatus("Syntax OK");
+            setStatus("Validation successful");
           } else {
             output.value = data.error || data.message || "Invalid YAML";
             setStatus("Validation failed");
@@ -238,38 +223,6 @@
         } catch (e) {
           output.value = "Network error: " + (e.message || String(e));
           setStatus("Request failed");
-        }
-      });
-
-      btnAnalyze.addEventListener("click", async () => {
-        const yamlText = input.value;
-        setStatus("Analyzing with AI…");
-        btnAnalyze.disabled = true;
-        try {
-          const res = await postText("/analyze", yamlText);
-          const data = await res.json();
-          if (data.enabled === false) {
-            output.value = data.message || "AI analysis is not configured.";
-            setStatus("AI analysis unavailable");
-            return;
-          }
-          if (!data.ok) {
-            output.value = data.error || "Analysis failed.";
-            setStatus("AI analysis failed");
-            return;
-          }
-          let text = data.analysis || "";
-          if (data.truncated) {
-            text =
-              "[Note: input was truncated on the server for token limits.]\n\n" + text;
-          }
-          output.value = text;
-          setStatus("AI analysis ready");
-        } catch (e) {
-          output.value = "Network error: " + (e.message || String(e));
-          setStatus("Request failed");
-        } finally {
-          btnAnalyze.disabled = false;
         }
       });
     </script>

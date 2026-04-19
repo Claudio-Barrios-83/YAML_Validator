@@ -36,9 +36,6 @@ html[data-theme="dark"] {
   --dot-out: #569cd6;
   --status-bg: #007acc;
   --top-gradient: rgba(0, 127, 212, 0.08);
-  --btn-ai-bg: rgba(124, 106, 207, 0.22);
-  --btn-ai-border: #7c6ecf;
-  --btn-ai-hover: rgba(124, 106, 207, 0.36);
 }
 
 html[data-theme="light"] {
@@ -60,9 +57,6 @@ html[data-theme="light"] {
   --dot-out: #0451a5;
   --status-bg: #0078d4;
   --top-gradient: rgba(0, 120, 212, 0.06);
-  --btn-ai-bg: rgba(92, 45, 145, 0.08);
-  --btn-ai-border: #735fc4;
-  --btn-ai-hover: rgba(92, 45, 145, 0.16);
 }
 
 body {
@@ -210,18 +204,6 @@ html[data-theme="light"] .theme-toggle__glyph::before {
   line-height: 1.52;
 }
 
-.intro h2 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0.85rem 0 0.35rem;
-  letter-spacing: -0.015em;
-  color: var(--text-tab);
-}
-
-.intro h2:first-of-type {
-  margin-top: 0.35rem;
-}
-
 .intro p {
   margin: 0 0 0.65rem;
   font-size: 0.9rem;
@@ -249,7 +231,7 @@ html[data-theme="light"] .theme-toggle__glyph::before {
 
 @media (min-width: 900px) {
   .workspace {
-    grid-template-columns: 1fr minmax(132px, auto) 1fr;
+    grid-template-columns: 1fr minmax(112px, auto) 1fr;
     grid-template-rows: 1fr;
     grid-template-areas: "input actions output";
     gap: 0 12px;
@@ -427,17 +409,6 @@ html[data-theme="light"] .theme-toggle__glyph::before {
 
 .btn-secondary:hover {
   background: var(--btn-secondary-hover);
-}
-
-.btn-ai {
-  background: var(--btn-ai-bg);
-  color: var(--text);
-  border-color: var(--btn-ai-border);
-}
-
-.btn-ai:hover:not(:disabled) {
-  background: var(--btn-ai-hover);
-  border-color: var(--btn-ai-border);
 }
 
 .btn:disabled {
