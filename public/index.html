@@ -7,17 +7,76 @@
       name="description"
       content="Validate and clean YAML instantly online. Kubernetes-ready YAML validator tool."
     />
-    <meta name="robots" content="index, follow" />
+    <meta
+      name="keywords"
+      content="YAML validator, YAML linter, Kubernetes YAML, format YAML, clean YAML, CI/CD YAML, DevOps"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#0d1117" />
+    <!-- Update href when you set a custom domain (must match SITE_URL on the server) -->
+    <link rel="canonical" href="https://yaml-validator-zmgv.onrender.com/" />
     <meta property="og:title" content="Free YAML Validator Online" />
     <meta
       property="og:description"
       content="Validate and clean YAML instantly online. Kubernetes-ready YAML validator tool."
     />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:url" content="https://yaml-validator-zmgv.onrender.com/" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Free YAML Validator Online" />
+    <meta
+      name="twitter:description"
+      content="Validate and clean YAML instantly online. Kubernetes-ready YAML validator tool."
+    />
     <title>Free YAML Validator Online</title>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Free YAML Validator Online",
+        "description": "Validate, clean and format YAML in the browser. Kubernetes-ready. No installation.",
+        "url": "https://yaml-validator-zmgv.onrender.com/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript. Modern browser recommended.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is the difference between Clean and Format?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Format re-indents YAML without removing fields. Clean also removes common cluster-only noise from Kubernetes manifests (for example status blocks and read-only metadata) so the file is easier to store in Git."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does this validate Kubernetes API schemas?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Validate checks YAML syntax (parsing). It does not replace kubectl apply --dry-run or your cluster's admission controllers."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is my YAML stored on your servers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Content is processed in memory for each request to validate, clean, or format. Use this tool only with non-sensitive data if your policy requires it."
+            }
+          }
+        ]
+      }
+    </script>
 
     <!-- Google Analytics GA4 — replace GA_MEASUREMENT_ID with your Measurement ID -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GEFQWG7XSD"></script>
@@ -182,6 +241,27 @@
             <li>No installation required</li>
             <li>Works directly in your browser</li>
           </ul>
+
+          <h2 id="seo-faq" class="seo-block__h2">FAQ</h2>
+          <dl class="faq-list">
+            <dt class="faq-list__q">What is the difference between Clean and Format?</dt>
+            <dd class="faq-list__a">
+              <strong>Format</strong> only re-indents your YAML (2 spaces) and keeps every field.
+              <strong>Clean</strong> does that plus strips typical noise from exported Kubernetes YAML
+              (for example <code>status</code>, read-only metadata, large <code>last-applied-configuration</code>
+              annotations) so manifests are easier to review and commit.
+            </dd>
+            <dt class="faq-list__q">Does this validate Kubernetes API schemas?</dt>
+            <dd class="faq-list__a">
+              No. <strong>Validate</strong> checks that the text is valid YAML syntax. It does not replace
+              <code>kubectl apply --dry-run</code>, CRD schemas, or policies in your cluster.
+            </dd>
+            <dt class="faq-list__q">Is my YAML stored?</dt>
+            <dd class="faq-list__a">
+              Each request is handled in memory on the server for that operation. Treat sensitive secrets
+              according to your organization’s policy—prefer scrubbed samples for public tools.
+            </dd>
+          </dl>
         </section>
       </main>
 

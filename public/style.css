@@ -584,6 +584,38 @@ html[data-theme="light"] .tabs__btn.is-active {
   margin-bottom: 6px;
 }
 
+.faq-list {
+  margin: 0;
+}
+
+.faq-list__q {
+  margin: 1.1rem 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.faq-list__q:first-child {
+  margin-top: 0;
+}
+
+.faq-list__a {
+  margin: 0 0 0.75rem;
+  padding-left: 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.faq-list__a code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: rgba(88, 166, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+}
+
 /* —— Status bar —— */
 .status-bar {
   margin-top: 12px;

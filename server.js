@@ -230,7 +230,35 @@ function buildValidationError(err) {
   return payload;
 }
 
+/**
+ * Canonical base URL for SEO (sitemap, robots). Set SITE_URL in production when you add a custom domain.
+ * Example: SITE_URL=https://yamlvalidator.io
+ */
+const SITE_URL = (
+  process.env.SITE_URL || "https://yaml-validator-zmgv.onrender.com"
+).replace(/\/+$/, "");
+
 app.use(express.text({ type: "*/*", limit: "2mb" }));
+
+/* Serve before static so crawlers always get fresh sitemap when SITE_URL changes */
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain; charset=utf-8").send(
+    ["User-agent: *", "Allow: /", "", `Sitemap: ${SITE_URL}/sitemap.xml`, ""].join("\n"),
+  );
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${SITE_URL}/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+  res.type("application/xml; charset=utf-8").send(xml);
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.post("/validate", (req, res) => {
@@ -313,4 +341,5 @@ app.post("/clean", (req, res) => {
 
 app.listen(PORT, HOST, () => {
   console.log(`YAML Validator listening on http://${HOST}:${PORT}`);
+  console.log(`SEO sitemap/robots use SITE_URL=${SITE_URL}`);
 });
