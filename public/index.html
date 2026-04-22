@@ -99,7 +99,7 @@
             </section>
 
             <div class="action-column" role="group" aria-label="Actions">
-              <div class="tabs" role="tablist" aria-label="Choose action">
+              <div class="tabs" role="tablist" aria-label="Run action — click a tab">
                 <button
                   type="button"
                   class="tabs__btn is-active"
@@ -131,9 +131,6 @@
                   Format
                 </button>
               </div>
-              <button type="button" class="btn btn-primary btn-run" id="btn-run">
-                Run <span class="btn-run__hint" id="run-hint">Validate</span>
-              </button>
             </div>
 
             <section class="editor-panel editor-panel--output" aria-labelledby="label-output">
@@ -162,7 +159,7 @@
                     class="editor-textarea"
                     readonly
                     spellcheck="false"
-                    placeholder="Results appear here after you run an action."
+                    placeholder="Choose Validate, Clean, or Format — results appear here."
                     rows="18"
                   ></textarea>
                 </div>
@@ -196,15 +193,13 @@
     <script>
       /**
        * YAML Validator — client logic (no frameworks).
-       * Tabs pick the action; Run executes. Clean/Format expect JSON from API.
+       * Each tab runs its action on click (Validate / Clean / Format).
        */
 
       const input = document.getElementById("yaml-input");
       const output = document.getElementById("yaml-output");
       const statusText = document.getElementById("status-text");
       const detectionText = document.getElementById("detection-text");
-      const btnRun = document.getElementById("btn-run");
-      const runHint = document.getElementById("run-hint");
       const btnClearInput = document.getElementById("btn-clear-input");
       const btnCopyOutput = document.getElementById("btn-copy-output");
       const btnDownloadYaml = document.getElementById("btn-download-yaml");
@@ -212,9 +207,6 @@
       const tabButtons = document.querySelectorAll(".tabs__btn");
 
       const THEME_KEY = "yaml-validator-theme";
-
-      /** @type {'validate' | 'clean' | 'format'} */
-      let currentAction = "validate";
 
       function getPreferredTheme() {
         const saved = localStorage.getItem(THEME_KEY);
@@ -284,19 +276,25 @@
       }
 
       function setActiveTab(action) {
-        currentAction = action;
         tabButtons.forEach((btn) => {
           const on = btn.dataset.action === action;
           btn.classList.toggle("is-active", on);
           btn.setAttribute("aria-selected", on ? "true" : "false");
         });
-        const labels = { validate: "Validate", clean: "Clean", format: "Format" };
-        runHint.textContent = labels[action];
+      }
+
+      /** Dispatches the backend call for the selected tab action */
+      function runAction(action) {
+        if (action === "validate") runValidate();
+        else if (action === "clean") runClean();
+        else runFormat();
       }
 
       tabButtons.forEach((btn) => {
         btn.addEventListener("click", () => {
-          setActiveTab(/** @type {'validate'|'clean'|'format'} */ (btn.dataset.action));
+          const action = /** @type {'validate'|'clean'|'format'} */ (btn.dataset.action);
+          setActiveTab(action);
+          runAction(action);
         });
       });
 
@@ -430,12 +428,6 @@
           setStatus("Request failed");
         }
       }
-
-      btnRun.addEventListener("click", () => {
-        if (currentAction === "validate") runValidate();
-        else if (currentAction === "clean") runClean();
-        else runFormat();
-      });
 
       setActiveTab("validate");
     </script>

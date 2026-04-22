@@ -440,6 +440,9 @@ html[data-theme="light"] .theme-toggle__glyph::before {
 
 .tabs__btn {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--border-subtle);
   background: var(--bg-elevated);
   color: var(--text-dim);
@@ -450,6 +453,13 @@ html[data-theme="light"] .theme-toggle__glyph::before {
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: var(--transition);
+  min-height: 40px;
+}
+
+@media (min-width: 960px) {
+  .tabs__btn {
+    width: 100%;
+  }
 }
 
 .tabs__btn:hover {
@@ -466,24 +476,6 @@ html[data-theme="light"] .theme-toggle__glyph::before {
 
 html[data-theme="light"] .tabs__btn.is-active {
   color: #fff;
-}
-
-.btn-run {
-  width: 100%;
-  min-height: 42px;
-  font-size: 13px;
-  background: var(--accent);
-  border-color: transparent;
-  color: #fff;
-}
-
-.btn-run:hover {
-  background: var(--accent-hover);
-}
-
-.btn-run__hint {
-  opacity: 0.9;
-  font-weight: 500;
 }
 
 /* —— Buttons —— */
